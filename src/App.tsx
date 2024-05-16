@@ -1,24 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import PDUGroup from './components/PduGroup';
+import { DataFormat, MinerI } from './types/types';
+import data from './data/miners.json'
 
 function App() {
+  const containerData: DataFormat = data;
+  const values: MinerI[] = containerData["19"].values;
+  
+  // Group data by PDU
+  const groupByPdu = values.reduce((acc: Record<number, MinerI[]>, miner: MinerI) => {
+    if (miner.s !== undefined) {
+      acc[miner.pdu] = acc[miner.pdu] || [];
+      acc[miner.pdu].push(miner);
+    }
+    return acc;
+  }, {});
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="container">
+        <div className="container-title">
+          <span className="title-text">{containerData["19"].name}</span>
+        </div>
+        <div className="pdu-container">
+          {Object.entries(groupByPdu).map(([pduKey, miners]) => (
+            <PDUGroup key={pduKey} pduKey={pduKey} miners={miners} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
